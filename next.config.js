@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: '.next-build',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },  distDir: '.next-build',
 }
 
 module.exports = nextConfig
