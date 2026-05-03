@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import BrokerForm from '@/components/brokers/BrokerForm'
 import { notFound } from 'next/navigation'
 
-export default async function EditBrokerPage({ params }: { params: { id: string } }) {
+export default async function EditBrokerPage({ params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -16,7 +18,7 @@ export default async function EditBrokerPage({ params }: { params: { id: string 
   const { data: broker } = await supabase
     .from('brokers')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('company_id', userData?.company_id)
     .single()
   

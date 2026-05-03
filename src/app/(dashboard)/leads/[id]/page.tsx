@@ -20,7 +20,9 @@ const statusLabels = {
   withdrawn: 'Withdrawn',
 }
 
-export default async function LeadDetailPage({ params }: { params: { id: string } }) {
+export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -34,7 +36,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   const { data: lead } = await supabase
     .from('loan_leads')
     .select('*, broker:brokers(name, company_name, email, phone)')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('company_id', userData?.company_id)
     .single()
   

@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import LeadForm from '@/components/leads/LeadForm'
 import { notFound } from 'next/navigation'
 
-export default async function EditLeadPage({ params }: { params: { id: string } }) {
+export default async function EditLeadPage({ params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -16,7 +18,7 @@ export default async function EditLeadPage({ params }: { params: { id: string } 
   const { data: lead } = await supabase
     .from('loan_leads')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('company_id', userData?.company_id)
     .single()
   

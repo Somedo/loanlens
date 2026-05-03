@@ -45,7 +45,7 @@ export default function LoanForm({ loan, lenderEntities, brokers, solicitors, co
 
   const [fees, setFees] = useState(loan?.fees || [])
 
-  const toggleSection = (section: string) => {
+  const toggleSection = (section: 'loan' | 'borrower' | 'property' | 'fees') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
 

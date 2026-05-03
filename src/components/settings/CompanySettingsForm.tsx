@@ -29,6 +29,7 @@ interface Company {
   bank_account_name?: string
   bank_sort_code?: string
   bank_account_number?: string
+  country?: string
 }
 
 export default function CompanySettingsForm({ company }: { company: Company }) {

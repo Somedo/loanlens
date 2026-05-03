@@ -1,26 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from('brokers')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-  
-  return NextResponse.json({ broker: data })
-}
-
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -30,7 +10,7 @@ export async function PATCH(
   const body = await request.json()
   
   const { data, error } = await supabase
-    .from('brokers')
+    .from('deals')
     .update({
       ...body,
       updated_at: new Date().toISOString()
@@ -43,7 +23,7 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
   
-  return NextResponse.json({ broker: data })
+  return NextResponse.json({ deal: data })
 }
 
 export async function DELETE(
@@ -54,7 +34,7 @@ export async function DELETE(
   const supabase = await createClient()
   
   const { error } = await supabase
-    .from('brokers')
+    .from('deals')
     .delete()
     .eq('id', id)
   
