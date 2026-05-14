@@ -105,49 +105,8 @@ export function KanbanBoard() {
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
-
-    const activeId = active.id as string
-    const overId = over.id as string
-
-    // Find active and over deals
-    const activeDeal = deals.find((d) => d.id === activeId)
-    if (!activeDeal) return
-
-    // Check if we're over a stage column
-    const overStage = STAGES.find((s) => s.id === overId)?.id
-    
-    if (overStage) {
-      // Moving to a different stage column
-      if (activeDeal.stage !== overStage) {
-        setDeals((prevDeals) => {
-          const newDeals = prevDeals.map((deal) =>
-            deal.id === activeId
-              ? { ...deal, stage: overStage, position: 0 }
-              : deal
-          )
-          return newDeals
-        })
-      }
-      return
-    }
-
-    // Check if we're over another deal
-    const overDeal = deals.find((d) => d.id === overId)
-    if (!overDeal) return
-
-    // If in different stages, move to the over deal's stage
-    if (activeDeal.stage !== overDeal.stage) {
-      setDeals((prevDeals) => {
-        const newDeals = prevDeals.map((deal) =>
-          deal.id === activeId
-            ? { ...deal, stage: overDeal.stage }
-            : deal
-        )
-        return newDeals
-      })
-    }
+    // No local state mutation here; handle saving on drag end only.
+    if (!event.over) return
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -174,6 +133,13 @@ export function KanbanBoard() {
       }
     }
 
+    console.log('Kanban drag end:', {
+      activeId,
+      overId,
+      sourceStage: activeDeal.stage,
+      targetStage,
+    })
+
     const stageDeals = deals
       .filter((d) => d.stage === targetStage)
       .sort((a, b) => a.position - b.position)
@@ -181,19 +147,19 @@ export function KanbanBoard() {
     const oldIndex = stageDeals.findIndex((d) => d.id === activeId)
     const newIndex = stageDeals.findIndex((d) => d.id === overId)
 
-    if (oldIndex === -1) {
-      // Deal is coming from another stage
-      const reorderedDeals = [...stageDeals]
-      const newPosition = newIndex >= 0 ? newIndex : reorderedDeals.length
-      
+    console.log('Kanban indices:', { oldIndex, newIndex, stageSize: stageDeals.length })
+
+    if (activeDeal.stage !== targetStage || (newIndex >= 0 && oldIndex !== newIndex)) {
+      const newPosition = oldIndex === -1 ? (newIndex >= 0 ? newIndex : stageDeals.length) : newIndex
+
       // Update local state optimistically
       setDeals((prevDeals) => {
-        return prevDeals.map((deal, idx) => {
+        return prevDeals.map((deal) => {
           if (deal.id === activeId) {
             return { ...deal, stage: targetStage, position: newPosition }
           }
-          if (deal.stage === targetStage) {
-            if (deal.position >= newPosition && deal.id !== activeId) {
+          if (deal.stage === targetStage && deal.id !== activeId) {
+            if (deal.position >= newPosition) {
               return { ...deal, position: deal.position + 1 }
             }
           }
@@ -201,9 +167,8 @@ export function KanbanBoard() {
         })
       })
 
-      // Call API to update on server
       try {
-        await fetch(`/api/deals/${activeId}/stage`, {
+        const response = await fetch(`/api/deals/${activeId}/stage`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -211,38 +176,14 @@ export function KanbanBoard() {
             position: newPosition,
           }),
         })
+        const responseBody = await response.text()
+        console.log('Kanban save response:', response.status, responseBody)
+        if (!response.ok) {
+          console.error('Failed to save deal move:', response.statusText)
+          fetchDeals()
+        }
       } catch (error) {
-        console.error('Failed to update deal stage:', error)
-        // Revert on error
-        fetchDeals()
-      }
-    } else if (newIndex >= 0 && oldIndex !== newIndex) {
-      // Reordering within the same stage
-      const reorderedDeals = arrayMove(stageDeals, oldIndex, newIndex)
-      
-      // Update local state optimistically
-      setDeals((prevDeals) => {
-        const otherDeals = prevDeals.filter((d) => d.stage !== targetStage)
-        const updatedStageDeals = reorderedDeals.map((deal, idx) => ({
-          ...deal,
-          position: idx,
-        }))
-        return [...otherDeals, ...updatedStageDeals]
-      })
-
-      // Call API to update on server
-      try {
-        await fetch(`/api/deals/${activeId}/stage`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            stage: targetStage,
-            position: newIndex,
-          }),
-        })
-      } catch (error) {
-        console.error('Failed to update deal position:', error)
-        // Revert on error
+        console.error('Failed to save deal move:', error)
         fetchDeals()
       }
     }

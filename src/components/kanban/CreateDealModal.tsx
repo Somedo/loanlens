@@ -56,11 +56,18 @@ export function CreateDealModal({ onClose, onCreated }: CreateDealModalProps) {
         }),
       })
 
+      const text = await response.text()
+      console.log('Create deal response:', response.status, text)
       if (response.ok) {
         onCreated()
       } else {
-        const error = await response.json()
-        alert(`Failed to create deal: ${error.message}`)
+        let error
+        try {
+          error = JSON.parse(text)
+        } catch {
+          error = { message: text }
+        }
+        alert(`Failed to create deal: ${error.message || response.statusText}`)
       }
     } catch (error) {
       console.error('Failed to create deal:', error)
