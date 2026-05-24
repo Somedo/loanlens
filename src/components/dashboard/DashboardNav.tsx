@@ -17,7 +17,7 @@ export default function DashboardNav({ user }: { user: any }) {
 
   const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
-  { name: 'New Leads', href: '/leads' },
+  { name: 'New Leads', href: '/deals' },
   { name: 'Brokers', href: '/brokers' },
   { name: 'Add Loan', href: '/loans/new' },
   { name: 'Lender Entities', href: '/lender-entities'},
