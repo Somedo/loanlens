@@ -19,6 +19,7 @@ import { format } from 'date-fns'
 interface DealCardProps {
   deal: Deal
   isDragging?: boolean
+  onClick?: () => void
 }
 
 const PRIORITY_COLORS = {
@@ -28,7 +29,7 @@ const PRIORITY_COLORS = {
   urgent: 'bg-red-100 text-red-800 border-red-200',
 }
 
-export function DealCard({ deal, isDragging }: DealCardProps) {
+export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
   const {
     attributes,
     listeners,
@@ -58,14 +59,20 @@ export function DealCard({ deal, isDragging }: DealCardProps) {
     <Card
       ref={setNodeRef}
       style={style}
-      className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow ${
+      onClick={isSortableDragging ? undefined : onClick}
+      className={`p-4 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all ${
         isDragging ? 'shadow-lg rotate-3' : ''
-      }`}
+      } ${onClick ? 'active:scale-[0.99]' : ''}`}
     >
       <div className="space-y-3">
         {/* Header with drag handle and priority */}
         <div className="flex items-start gap-2">
-          <div {...attributes} {...listeners} className="mt-1">
+          <div
+            {...attributes}
+            {...listeners}
+            className="mt-1 cursor-grab active:cursor-grabbing"
+            onClick={(e) => e.stopPropagation()}
+          >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">

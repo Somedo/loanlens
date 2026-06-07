@@ -17,9 +17,10 @@ interface KanbanColumnProps {
   }
   deals: Deal[]
   isLoading?: boolean
+  onDealClick?: (deal: Deal) => void
 }
 
-export function KanbanColumn({ stage, deals, isLoading }: KanbanColumnProps) {
+export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({
     id: stage.id,
   })
@@ -48,7 +49,7 @@ export function KanbanColumn({ stage, deals, isLoading }: KanbanColumnProps) {
       {/* Cards Container */}
       <div
         ref={setNodeRef}
-        className="flex-1 bg-muted/20 rounded-lg p-3 min-h-[200px]"
+        className="flex-1 bg-muted/20 rounded-lg p-3 min-h-50"
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
@@ -65,7 +66,13 @@ export function KanbanColumn({ stage, deals, isLoading }: KanbanColumnProps) {
                   No deals in this stage
                 </div>
               ) : (
-                deals.map((deal) => <DealCard key={deal.id} deal={deal} />)
+                deals.map((deal) => (
+                  <DealCard
+                    key={deal.id}
+                    deal={deal}
+                    onClick={onDealClick ? () => onDealClick(deal) : undefined}
+                  />
+                ))
               )}
             </div>
           </SortableContext>

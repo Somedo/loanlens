@@ -16,6 +16,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
 import { DealCard } from './DealCard'
+import { DealDetailsModal } from './DealDetailsModal'
 
 export type DealStage = 'lead' | 'active' | 'completion' | 'redeemed'
 
@@ -61,6 +62,52 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleDealClick = (deal: Deal) => {
+    setSelectedDeal(deal)
+    setIsModalOpen(true)
+  }
+
+  const handleSaveDeal = async (updatedDeal: Deal) => {
+    const response = await fetch(`/api/deals/${updatedDeal.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: updatedDeal.title,
+        description: updatedDeal.description,
+        stage: updatedDeal.stage,
+        priority: updatedDeal.priority,
+        loan_amount: updatedDeal.loan_amount,
+        property_value: updatedDeal.property_value,
+        ltv_percentage: updatedDeal.ltv_percentage,
+        client_name: updatedDeal.client_name,
+        client_email: updatedDeal.client_email,
+        client_phone: updatedDeal.client_phone,
+        property_address: updatedDeal.property_address,
+        property_postcode: updatedDeal.property_postcode,
+      }),
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error ?? 'Failed to save')
+    }
+    const { deal: saved } = await response.json()
+    setDeals(prev => prev.map(d => d.id === updatedDeal.id ? saved : d))
+    setSelectedDeal(saved)
+  }
+
+  const handleDeleteDeal = async (dealId: string) => {
+    const response = await fetch(`/api/deals/${dealId}`, { method: 'DELETE' })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error ?? 'Failed to delete')
+    }
+    setDeals(prev => prev.filter(d => d.id !== dealId))
+    setIsModalOpen(false)
+    setSelectedDeal(null)
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -169,6 +216,7 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
             stage={stage}
             deals={dealsByStage[stage.id] || []}
             isLoading={isLoading}
+            onDealClick={handleDealClick}
           />
         ))}
       </div>
@@ -176,6 +224,14 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
       <DragOverlay>
         {activeDeal ? <DealCard deal={activeDeal} isDragging /> : null}
       </DragOverlay>
+
+      <DealDetailsModal
+        deal={selectedDeal}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveDeal}
+        onDelete={handleDeleteDeal}
+      />
     </DndContext>
   )
 }
