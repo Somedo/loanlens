@@ -128,3 +128,114 @@
     @apply font-sans;
   }
 }
+
+/* ===== THEME COLOR VARIABLES ===== */
+
+/* THEME 1: PROFESSIONAL DARK (DEFAULT) */
+[data-theme='dark-pro'],
+.theme-dark-pro {
+  --primary: #1e293b;
+  --primary-light: #334155;
+  --secondary: #0f172a;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #f87171;
+  --light-bg: #f8fafc;
+  --dark-bg: #0f172a;
+  --text-dark: #0f172a;
+  --text-light: #475569;
+  --text-lighter: #94a3b8;
+  --border: #cbd5e1;
+  --card-bg: #ffffff;
+  --hover-bg: #f1f5f9;
+}
+
+/* THEME 2: MODERN BLUE */
+[data-theme='modern-blue'],
+.theme-modern-blue {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --secondary: #1e40af;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --light-bg: #f0f9ff;
+  --dark-bg: #1e3a8a;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --text-lighter: #9ca3af;
+  --border: #e5e7eb;
+  --card-bg: #ffffff;
+  --hover-bg: #f3f4f6;
+}
+
+/* THEME 3: MINIMAL GREEN */
+[data-theme='minimal-green'],
+.theme-minimal-green {
+  --primary: #059669;
+  --primary-light: #10b981;
+  --secondary: #047857;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --light-bg: #ecfdf5;
+  --dark-bg: #064e3b;
+  --text-dark: #065f46;
+  --text-light: #6b7280;
+  --text-lighter: #9ca3af;
+  --border: #d1fae5;
+  --card-bg: #ffffff;
+  --hover-bg: #f0fdf4;
+}
+
+/* THEME 4: LUXURY GOLD */
+[data-theme='luxury-gold'],
+.theme-luxury-gold {
+  --primary: #b8860b;
+  --primary-light: #daa520;
+  --secondary: #8b6914;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --light-bg: #fef3c7;
+  --dark-bg: #451a03;
+  --text-dark: #451a03;
+  --text-light: #78350f;
+  --text-lighter: #b45309;
+  --border: #fcd34d;
+  --card-bg: #fffbeb;
+  --hover-bg: #fefce8;
+}
+
+/* THEME 5: TECH PURPLE */
+[data-theme='tech-purple'],
+.theme-tech-purple {
+  --primary: #7c3aed;
+  --primary-light: #a78bfa;
+  --secondary: #6d28d9;
+  --success: #14b8a6;
+  --warning: #f59e0b;
+  --danger: #f43f5e;
+  --light-bg: #f3e8ff;
+  --dark-bg: #3f0f5c;
+  --text-dark: #3f0f5c;
+  --text-light: #6b7280;
+  --text-lighter: #9ca3af;
+  --border: #e9d5ff;
+  --card-bg: #ffffff;
+  --hover-bg: #faf5ff;
+}
+
+/* Apply theme colors to common elements */
+body {
+  color: var(--text-dark);
+  background-color: var(--light-bg);
+}
+
+a {
+  color: var(--primary);
+}
+
+a:hover {
+  color: var(--primary-light);
+}

@@ -1,65 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import CompanySettingsForm from '@/components/settings/CompanySettingsForm'
+'use client'
 
-export default async function SettingsPage() {
-  const supabase = await createClient()
-  
-  // Get current user
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  
-  if (userError || !user) {
-    redirect('/login')
-  }
+import { ThemeSelector } from '@/components/settings/ThemeSelector'
 
-  // Get the user's company_id from the users table
-  const { data: userData } = await supabase
-    .from('users')
-    .select('company_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!userData?.company_id) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
-          <p className="mt-2 text-sm text-gray-700">No company found. Please contact support.</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Fetch the company data
-  const { data: company } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('id', userData.company_id)
-    .single()
-
-  if (!company) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
-          <p className="mt-2 text-sm text-gray-700">Company not found. Please contact support.</p>
-        </div>
-      </div>
-    )
-  }
-
+export default function SettingsPage() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage your company profile, addresses, and regulatory information.
-          </p>
-        </div>
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8 text-text-dark">Settings</h1>
 
-        <CompanySettingsForm company={company} />
+      <div className="bg-white rounded-lg shadow-md p-8 mb-6 border border-gray-200">
+        <ThemeSelector />
       </div>
+
+      {/* Add other settings sections here in the future */}
     </div>
   )
 }
