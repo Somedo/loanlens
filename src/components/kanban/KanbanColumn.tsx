@@ -19,11 +19,13 @@ interface KanbanColumnProps {
     columnBg: string
   }
   deals: Deal[]
+  totalDeals: number
+  isFiltered?: boolean
   isLoading?: boolean
   onDealClick?: (deal: Deal) => void
 }
 
-export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanColumnProps) {
+export function KanbanColumn({ stage, deals, totalDeals, isFiltered, isLoading, onDealClick }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage.id })
 
   return (
@@ -36,7 +38,9 @@ export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanCol
             <h2 className="font-semibold text-sm tracking-wide">{stage.title}</h2>
           </div>
           <span className="bg-white/25 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums">
-            {deals.length}
+            {isFiltered && deals.length !== totalDeals
+              ? `${deals.length} of ${totalDeals}`
+              : deals.length}
           </span>
         </div>
         {/* Progress bar */}
@@ -66,7 +70,9 @@ export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanCol
               {deals.length === 0 ? (
                 <div className="text-center py-10 text-muted-foreground/60 text-sm">
                   <div className="text-2xl mb-2 opacity-40">{stage.emoji}</div>
-                  No deals here
+                  {isFiltered && totalDeals > 0
+                    ? 'No deals match filters'
+                    : 'No deals here'}
                 </div>
               ) : (
                 deals.map((deal) => (

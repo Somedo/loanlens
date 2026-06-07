@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
+import { KanbanFilters } from './KanbanFilters'
 import { DealCard } from './DealCard'
 import { DealDetailsModal } from './DealDetailsModal'
 
@@ -102,6 +103,47 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState<string | null>(null)
+  const [dateRange, setDateRange] = useState<{ from: Date | null; to: Date | null }>({
+    from: null,
+    to: null,
+  })
+
+  const filteredDeals = useMemo(() => {
+    let result = deals
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (d) =>
+          d.title.toLowerCase().includes(q) ||
+          (d.client_name?.toLowerCase() ?? '').includes(q)
+      )
+    }
+
+    if (priorityFilter) {
+      result = result.filter((d) => d.priority === priorityFilter)
+    }
+
+    if (dateRange.from || dateRange.to) {
+      result = result.filter((d) => {
+        const created = new Date(d.created_at)
+        if (dateRange.from && created < dateRange.from) return false
+        if (dateRange.to && created > dateRange.to) return false
+        return true
+      })
+    }
+
+    return result
+  }, [deals, searchQuery, priorityFilter, dateRange])
+
+  const activeFiltersCount =
+    (searchQuery.trim() ? 1 : 0) +
+    (priorityFilter ? 1 : 0) +
+    (dateRange.from || dateRange.to ? 1 : 0)
+
   const handleDealClick = (deal: Deal) => {
     setSelectedDeal(deal)
     setIsModalOpen(true)
@@ -157,8 +199,17 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
     })
   )
 
+  // Full (unfiltered) deals by stage — used for drag position calculation
   const dealsByStage = STAGES.reduce((acc, stage) => {
     acc[stage.id] = deals
+      .filter(deal => deal.stage === stage.id)
+      .sort((a, b) => a.position - b.position)
+    return acc
+  }, {} as Record<DealStage, Deal[]>)
+
+  // Filtered deals by stage — what each column actually renders
+  const filteredDealsByStage = STAGES.reduce((acc, stage) => {
+    acc[stage.id] = filteredDeals
       .filter(deal => deal.stage === stage.id)
       .sort((a, b) => a.position - b.position)
     return acc
@@ -246,12 +297,23 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
+      <KanbanFilters
+        onSearchChange={setSearchQuery}
+        onPriorityChange={setPriorityFilter}
+        onDateRangeChange={(from, to) => setDateRange({ from, to })}
+        currentSearch={searchQuery}
+        currentPriority={priorityFilter}
+        activeFiltersCount={activeFiltersCount}
+      />
+
       <div className="flex gap-4 overflow-x-auto pb-6 scroll-smooth">
         {STAGES.map(stage => (
           <KanbanColumn
             key={stage.id}
             stage={stage}
-            deals={dealsByStage[stage.id] || []}
+            deals={filteredDealsByStage[stage.id] || []}
+            totalDeals={dealsByStage[stage.id]?.length ?? 0}
+            isFiltered={activeFiltersCount > 0}
             isLoading={isLoading}
             onDealClick={handleDealClick}
           />
