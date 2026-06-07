@@ -46,11 +46,48 @@ export interface Deal {
   redeemed_at?: string
 }
 
-const STAGES: { id: DealStage; title: string; color: string }[] = [
-  { id: 'lead', title: 'Lead', color: 'bg-blue-500' },
-  { id: 'active', title: 'Active', color: 'bg-yellow-500' },
-  { id: 'completion', title: 'Completion', color: 'bg-purple-500' },
-  { id: 'redeemed', title: 'Redeemed', color: 'bg-green-500' },
+interface StageConfig {
+  id: DealStage
+  title: string
+  emoji: string
+  color: string
+  headerBg: string
+  columnBg: string
+}
+
+const STAGES: StageConfig[] = [
+  {
+    id: 'lead',
+    title: 'Lead',
+    emoji: '📋',
+    color: 'bg-blue-500',
+    headerBg: 'bg-blue-600',
+    columnBg: 'bg-blue-50/60 dark:bg-blue-950/20',
+  },
+  {
+    id: 'active',
+    title: 'Active',
+    emoji: '⚡',
+    color: 'bg-amber-500',
+    headerBg: 'bg-amber-500',
+    columnBg: 'bg-amber-50/60 dark:bg-amber-950/20',
+  },
+  {
+    id: 'completion',
+    title: 'Completion',
+    emoji: '✅',
+    color: 'bg-violet-500',
+    headerBg: 'bg-violet-600',
+    columnBg: 'bg-violet-50/60 dark:bg-violet-950/20',
+  },
+  {
+    id: 'redeemed',
+    title: 'Redeemed',
+    emoji: '💰',
+    color: 'bg-emerald-500',
+    headerBg: 'bg-emerald-600',
+    columnBg: 'bg-emerald-50/60 dark:bg-emerald-950/20',
+  },
 ]
 
 interface KanbanBoardProps {
@@ -209,7 +246,7 @@ export function KanbanBoard({ deals, isLoading, setDeals, onRefetch }: KanbanBoa
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-4 overflow-x-auto pb-6 scroll-smooth">
         {STAGES.map(stage => (
           <KanbanColumn
             key={stage.id}

@@ -13,7 +13,10 @@ interface KanbanColumnProps {
   stage: {
     id: string
     title: string
+    emoji: string
     color: string
+    headerBg: string
+    columnBg: string
   }
   deals: Deal[]
   isLoading?: boolean
@@ -21,35 +24,34 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanColumnProps) {
-  const { setNodeRef } = useDroppable({
-    id: stage.id,
-  })
+  const { setNodeRef } = useDroppable({ id: stage.id })
 
   return (
-    <div className="flex-1 min-w-[320px] flex flex-col">
-      {/* Column Header */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`w-3 h-3 rounded-full ${stage.color}`} />
-          <h2 className="font-semibold text-lg">{stage.title}</h2>
-          <span className="text-sm text-muted-foreground">
-            ({deals.length})
+    <div className="w-75 sm:w-80 shrink-0 flex flex-col rounded-xl overflow-hidden shadow-sm border border-border/50">
+      {/* Colored header */}
+      <div className={`${stage.headerBg} px-4 py-3 text-white`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base leading-none">{stage.emoji}</span>
+            <h2 className="font-semibold text-sm tracking-wide">{stage.title}</h2>
+          </div>
+          <span className="bg-white/25 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums">
+            {deals.length}
           </span>
         </div>
-        <div className="h-1 bg-muted rounded-full">
+        {/* Progress bar */}
+        <div className="mt-2.5 h-1 bg-white/25 rounded-full">
           <div
-            className={`h-full rounded-full ${stage.color} transition-all`}
-            style={{
-              width: `${deals.length > 0 ? Math.min((deals.length / 10) * 100, 100) : 0}%`,
-            }}
+            className="h-full bg-white/70 rounded-full transition-all duration-300"
+            style={{ width: `${deals.length > 0 ? Math.min((deals.length / 10) * 100, 100) : 0}%` }}
           />
         </div>
       </div>
 
-      {/* Cards Container */}
+      {/* Cards container */}
       <div
         ref={setNodeRef}
-        className="flex-1 bg-muted/20 rounded-lg p-3 min-h-50"
+        className={`flex-1 ${stage.columnBg} p-3 min-h-120`}
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
@@ -62,8 +64,9 @@ export function KanbanColumn({ stage, deals, isLoading, onDealClick }: KanbanCol
           >
             <div className="space-y-3">
               {deals.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  No deals in this stage
+                <div className="text-center py-10 text-muted-foreground/60 text-sm">
+                  <div className="text-2xl mb-2 opacity-40">{stage.emoji}</div>
+                  No deals here
                 </div>
               ) : (
                 deals.map((deal) => (

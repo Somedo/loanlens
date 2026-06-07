@@ -83,9 +83,9 @@ export default function DealsPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 h-screen flex flex-col">
+    <div className="py-2">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Deal Pipeline</h1>
           <p className="text-muted-foreground">Manage your bridging loan deals</p>
@@ -135,25 +135,21 @@ export default function DealsPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-auto">
-        {viewMode === 'kanban' ? (
-          <div className="h-full flex flex-col">
-            <KanbanBoard
-              deals={deals}
-              isLoading={isLoading}
-              setDeals={setDeals}
-              onRefetch={fetchDeals}
-            />
-          </div>
-        ) : (
-          <DealsListView
-            deals={deals}
-            onDealClick={handleDealClick}
-            onStageChange={handleStageChange}
-            onDelete={handleDelete}
-          />
-        )}
-      </div>
+      {viewMode === 'kanban' ? (
+        <KanbanBoard
+          deals={deals}
+          isLoading={isLoading}
+          setDeals={setDeals}
+          onRefetch={fetchDeals}
+        />
+      ) : (
+        <DealsListView
+          deals={deals}
+          onDealClick={handleDealClick}
+          onStageChange={handleStageChange}
+          onDelete={handleDelete}
+        />
+      )}
 
       {showCreateModal && (
         <CreateDealModal
