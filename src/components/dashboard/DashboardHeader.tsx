@@ -29,7 +29,7 @@ export default function DashboardHeader({ user }: { user: any }) {
           {/* Hamburger Button - Mobile only */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer hover:bg-purple-100 active:bg-purple-200 group border-2 border-gray-300 hover:border-purple-300"
+            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer hover:bg-purple-100 active:bg-purple-200 group border-2 border-gray-300 hover:border-purple-300"
             aria-label="Toggle menu"
             title="Open menu"
           >
@@ -66,14 +66,14 @@ export default function DashboardHeader({ user }: { user: any }) {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity duration-300"
+          className="lg:hidden fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity duration-300"
           onClick={closeMenu}
         />
       )}
 
       {/* Mobile Menu */}
       <nav
-        className={`md:hidden fixed left-0 top-16 h-screen w-64 bg-white z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg ${
+        className={`lg:hidden fixed left-0 top-16 h-screen w-64 bg-white z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
