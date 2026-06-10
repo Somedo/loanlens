@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-export type ThemeName = 'modern-blue' | 'dark-pro' | 'minimal-green' | 'luxury-gold' | 'tech-purple'
+export type ThemeName = 'oxblood' | 'modern-blue' | 'dark-pro' | 'minimal-green' | 'luxury-gold' | 'tech-purple'
+
+const VALID_THEMES: ThemeName[] = ['oxblood', 'modern-blue', 'dark-pro', 'minimal-green', 'luxury-gold', 'tech-purple']
 
 interface ThemeContextType {
   theme: ThemeName
@@ -13,29 +15,39 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>('dark-pro')
+  const [theme, setThemeState] = useState<ThemeName>('oxblood')
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load theme on mount
   useEffect(() => {
     const loadTheme = async () => {
+      // 1. Instant: apply localStorage theme to avoid a flash
       try {
-        // Try to get from localStorage first (instant)
         const savedTheme = localStorage.getItem('theme') as ThemeName | null
-        if (savedTheme && ['modern-blue', 'dark-pro', 'minimal-green', 'luxury-gold', 'tech-purple'].includes(savedTheme)) {
+        if (savedTheme && VALID_THEMES.includes(savedTheme)) {
           setThemeState(savedTheme)
           applyTheme(savedTheme)
-          setIsLoading(false)
-          return
+        } else {
+          applyTheme('oxblood')
         }
+      } catch {
+        applyTheme('oxblood')
+      }
+      setIsLoading(false)
 
-        // Default to dark-pro
-        applyTheme('dark-pro')
-        setIsLoading(false)
-      } catch (error) {
-        console.error('Failed to load theme:', error)
-        applyTheme('dark-pro')
-        setIsLoading(false)
+      // 2. Reconcile: fetch the saved DB preference (source of truth across devices)
+      try {
+        const res = await fetch('/api/user-preferences')
+        if (res.ok) {
+          const data = await res.json()
+          const dbTheme = data?.theme as ThemeName | undefined
+          if (dbTheme && VALID_THEMES.includes(dbTheme)) {
+            setThemeState(dbTheme)
+            applyTheme(dbTheme)
+            localStorage.setItem('theme', dbTheme)
+          }
+        }
+      } catch {
+        // offline or not logged in — localStorage value stands
       }
     }
 
@@ -43,24 +55,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setTheme = async (newTheme: ThemeName) => {
+    // Apply immediately
+    setThemeState(newTheme)
+    applyTheme(newTheme)
     try {
-      // Update state immediately
-      setThemeState(newTheme)
-      applyTheme(newTheme)
       localStorage.setItem('theme', newTheme)
+    } catch {}
 
-      // Save to database (fire and forget)
+    // Persist to database
+    try {
       const response = await fetch('/api/user-preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: newTheme })
+        body: JSON.stringify({ theme: newTheme }),
       })
-
       if (!response.ok) {
-        console.error('Failed to save theme to database')
+        console.error('Theme saved locally, but database save failed')
       }
     } catch (error) {
-      console.error('Failed to save theme:', error)
+      console.error('Theme saved locally, but database save failed:', error)
     }
   }
 
@@ -81,7 +94,6 @@ export function useTheme() {
   return context
 }
 
-// Apply theme to document
 function applyTheme(theme: ThemeName) {
   document.documentElement.setAttribute('data-theme', theme)
   document.body.className = `theme-${theme}`

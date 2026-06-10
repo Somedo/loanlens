@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { MENU_ITEMS } from '@/components/dashboard/menuItems'
 
 export default function DashboardNav({ user }: { user: any }) {
   const pathname = usePathname()
@@ -15,43 +16,33 @@ export default function DashboardNav({ user }: { user: any }) {
     router.refresh()
   }
 
-  const navigation = [
-  { name: 'Dashboard', href: '/dashboard' },
-  { name: 'New Leads', href: '/deals' },
-  { name: 'Brokers', href: '/brokers' },
-  { name: 'Add Loan', href: '/loans/new' },
-  { name: 'Lender Entities', href: '/lender-entities'},
-  { name: 'Solicitors', href: '/solicitors' },
-  { name: 'All Loans', href: '/loans' },
-  { name: 'Borrowers', href: '/borrowers' },
-  { name: 'Properties', href: '/properties' },
-  { name: 'Settings', href: '/settings' },
-]
-
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-        <div className="flex h-16 shrink-0 items-center">
-          <h1 className="text-2xl font-bold text-blue-600">LoanLens</h1>
+      <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-sidebar-border bg-sidebar px-6 pb-4">
+        <div className="flex h-16 shrink-0 items-center gap-2">
+          <span className="inline-block w-[18px] h-[18px] rounded-[5px] relative" style={{ background: 'var(--primary)' }}>
+            <span className="absolute inset-[5px] rounded-[2px] border-[1.5px]" style={{ borderColor: 'var(--sidebar)' }} />
+          </span>
+          <h1 className="text-xl font-bold tracking-[-0.03em] text-sidebar-foreground">LoanLens</h1>
         </div>
 
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {navigation.map((item) => {
+                {MENU_ITEMS.map((item) => {
                   const isActive = pathname === item.href
                   return (
-                    <li key={item.name}>
+                    <li key={item.href}>
                       <Link
                         href={item.href}
-                        className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold ${
+                        className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
                           isActive
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                            : 'text-muted-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent'
                         }`}
                       >
-                        {item.name}
+                        {item.label}
                       </Link>
                     </li>
                   )
@@ -60,24 +51,24 @@ export default function DashboardNav({ user }: { user: any }) {
             </li>
 
             <li className="mt-auto">
-              <div className="border-t border-gray-200 pt-4">
+              <div className="border-t border-sidebar-border pt-4">
                 <div className="mb-4">
-                  <p className="text-xs text-gray-500">Company</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-muted-foreground">Company</p>
+                  <p className="text-sm font-medium text-sidebar-foreground">
                     {user?.company?.name || 'Your Company'}
                   </p>
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-xs text-gray-500">Logged in as</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-muted-foreground">Logged in as</p>
+                  <p className="text-sm font-medium text-sidebar-foreground">
                     {user?.email || 'User'}
                   </p>
                 </div>
 
                 <button
                   onClick={handleLogout}
-                  className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50"
+                  className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-destructive hover:bg-accent transition-colors"
                 >
                   Logout
                 </button>

@@ -1,7 +1,16 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import Link from 'next/link'
+import {
+  Wallet,
+  TrendingUp,
+  Clock,
+  Percent,
+  AlertTriangle,
+  CircleOff,
+  Plus,
+} from 'lucide-react'
+import StatCard from '@/components/dashboard/StatCard'
 
 interface Loan {
   id: string
@@ -72,17 +81,6 @@ export default function LenderDashboard() {
     })
   }, [loans, searchQuery, statusFilter])
 
-  // Calculate days until redemption
-  const daysUntilRedemption = (loan: Loan) => {
-    const redemptionDate = loan.redemption_date || loan.maturity_date
-    if (!redemptionDate) return 'N/A'
-
-    const today = new Date()
-    const redemption = new Date(redemptionDate)
-    const days = Math.ceil((redemption.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-    return days > 0 ? `${days} days` : 'Overdue'
-  }
-
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-GB', {
@@ -92,158 +90,156 @@ export default function LenderDashboard() {
     }).format(amount)
   }
 
-  // Format date
+  // Format date as DD.MM.YYYY
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('en-GB')
+    if (!dateString) return '—'
+    const d = new Date(dateString)
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    return `${dd}.${mm}.${d.getFullYear()}`
   }
 
-  // Get status badge color
-  const getStatusColor = (status: string) => {
+  // Status pill styling via tokens
+  const statusVar = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800'
-      case 'completion':
-        return 'bg-blue-100 text-blue-800'
-      case 'redeemed':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'default':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'active': return 'var(--status-active)'
+      case 'completion': return 'var(--status-completion)'
+      case 'redeemed': return 'var(--status-redeemed)'
+      case 'default': return 'var(--status-default)'
+      default: return 'var(--muted-foreground)'
     }
   }
 
   if (loading) {
-    return <div className="p-6">Loading...</div>
+    return <div className="p-6 text-muted-foreground">Loading portfolio…</div>
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Lender Dashboard</h1>
-        <p className="text-gray-600 mt-2">Manage and monitor your loan portfolio</p>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-[34px] font-extrabold tracking-[-0.035em] leading-none text-foreground">
+            Lender Dashboard
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Monitor deployment, accrual and redemption across your active book.
+          </p>
+        </div>
+        <button
+          onClick={() => { window.location.href = '/loans/new' }}
+          className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          style={{ background: 'var(--primary)' }}
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.2} />
+          New Loan
+        </button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Funds Deployed</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totals.deployed)}</p>
-            </div>
-            <div className="text-3xl">💵</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Pipeline</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totals.pipeline)}</p>
-            </div>
-            <div className="text-3xl">📈</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Expected Returns (30d)</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totals.expectedReturns30d)}</p>
-            </div>
-            <div className="text-3xl">💰</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Accrued Interest</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totals.accruredInterest)}</p>
-            </div>
-            <div className="text-3xl">💹</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Watchlist</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">£0</p>
-            </div>
-            <div className="text-3xl">⚠️</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Defaults</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totals.defaults)}</p>
-            </div>
-            <div className="text-3xl">🔴</div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StatCard
+          label="Funds Deployed"
+          value={formatCurrency(totals.deployed)}
+          caption={`${loans.filter((l) => l.status === 'active').length} active facilities`}
+          icon={Wallet}
+          rail="primary"
+        />
+        <StatCard
+          label="Pipeline"
+          value={formatCurrency(totals.pipeline)}
+          caption={totals.pipeline > 0 ? undefined : 'No deals in pipeline'}
+          captionMuted
+          icon={TrendingUp}
+          rail="completion"
+        />
+        <StatCard
+          label="Expected Returns · 30d"
+          value={formatCurrency(totals.expectedReturns30d)}
+          caption={totals.expectedReturns30d > 0 ? undefined : 'None redeeming this month'}
+          captionMuted
+          icon={Clock}
+          rail="primary"
+        />
+        <StatCard
+          label="Accrued Interest"
+          value={formatCurrency(totals.accruredInterest)}
+          caption="Live · floor-protected"
+          icon={Percent}
+          rail="primary"
+        />
+        <StatCard
+          label="Watchlist"
+          value={formatCurrency(0)}
+          caption="Nothing flagged"
+          captionMuted
+          icon={AlertTriangle}
+          rail="redeemed"
+        />
+        <StatCard
+          label="Defaults"
+          value={formatCurrency(totals.defaults)}
+          caption={totals.defaults > 0 ? undefined : 'Book in good standing'}
+          captionMuted
+          icon={CircleOff}
+          rail="default"
+        />
       </div>
 
       {/* Portfolio Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Portfolio</h2>
-
-        {/* Search and Filter */}
-        <div className="flex gap-4 mb-6 flex-wrap">
-          <input
-            type="text"
-            placeholder="Search by loan reference or borrower..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 min-w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="all">All Status</option>
-            <option value="lead">Lead</option>
-            <option value="active">Active</option>
-            <option value="completion">Completion</option>
-            <option value="redeemed">Redeemed</option>
-            <option value="default">Default</option>
-          </select>
-
-          {(searchQuery || statusFilter !== 'all') && (
-            <button
-              onClick={() => {
-                setSearchQuery('')
-                setStatusFilter('all')
-              }}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+      <div className="lens-card overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-[18px] border-b border-border flex-wrap gap-3">
+          <h2 className="text-lg font-bold tracking-[-0.025em] text-foreground">Portfolio</h2>
+          <div className="flex gap-2.5 flex-wrap">
+            <input
+              type="text"
+              placeholder="Search reference or borrower…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring w-56"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              Clear Filters
-            </button>
-          )}
+              <option value="all">All status</option>
+              <option value="lead">Lead</option>
+              <option value="active">Active</option>
+              <option value="completion">Completion</option>
+              <option value="redeemed">Redeemed</option>
+              <option value="default">Default</option>
+            </select>
+            {(searchQuery || statusFilter !== 'all') && (
+              <button
+                onClick={() => { setSearchQuery(''); setStatusFilter('all') }}
+                className="rounded-lg border border-input bg-secondary px-3 py-2 text-sm text-secondary-foreground hover:bg-muted"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Table */}
         {filteredLoans.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No loans match your filters</p>
+          <p className="text-muted-foreground text-center py-12 text-sm">
+            No facilities match your filters.
+          </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Loan Reference</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Borrower</th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-900">Gross Amount</th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-900">Monthly Rate</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Redemption Date</th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-900">Accrued Interest</th>
+                <tr>
+                  {['Reference', 'Borrower', 'Gross', 'Rate', 'Status', 'Redemption', 'Accrued'].map((h, i) => (
+                    <th
+                      key={h}
+                      className={`font-mono text-[10.5px] font-medium text-muted-foreground uppercase tracking-[0.06em] px-6 py-3 border-b border-border ${
+                        i === 2 || i === 3 || i === 6 ? 'text-right' : 'text-left'
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -251,21 +247,33 @@ export default function LenderDashboard() {
                   <tr
                     key={loan.id}
                     onClick={() => { window.location.href = `/loans/${loan.id}` }}
-                    className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                    className="cursor-pointer border-b border-border last:border-0 transition-colors hover:bg-accent"
                   >
-                    <td className="py-3 px-4 text-gray-900 font-medium">{loan.loan_reference}</td>
-                    <td className="py-3 px-4 text-gray-700">{loan.borrower_name}</td>
-                    <td className="py-3 px-4 text-right text-gray-900 font-medium">
+                    <td className="px-6 py-[15px] font-mono font-medium text-sm" style={{ color: 'var(--primary)' }}>
+                      {loan.loan_reference}
+                    </td>
+                    <td className="px-6 py-[15px] text-sm text-foreground">{loan.borrower_name}</td>
+                    <td className="px-6 py-[15px] text-right font-mono text-sm font-semibold text-foreground tabular-nums">
                       {formatCurrency(loan.gross_amount)}
                     </td>
-                    <td className="py-3 px-4 text-right text-gray-700">{loan.monthly_interest_rate}%</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(loan.status)}`}>
+                    <td className="px-6 py-[15px] text-right font-mono text-sm text-foreground tabular-nums">
+                      {loan.monthly_interest_rate}%
+                    </td>
+                    <td className="px-6 py-[15px]">
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md border border-input px-2.5 py-0.5 text-xs font-medium"
+                        style={{ color: statusVar(loan.status), background: 'var(--accent)' }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusVar(loan.status) }} />
                         {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-700">{formatDate(loan.redemption_date || loan.maturity_date)}</td>
-                    <td className="py-3 px-4 text-right text-gray-900">{formatCurrency(loan.interest_accrued || 0)}</td>
+                    <td className="px-6 py-[15px] font-mono text-sm text-foreground tabular-nums">
+                      {formatDate(loan.redemption_date || loan.maturity_date)}
+                    </td>
+                    <td className="px-6 py-[15px] text-right font-mono text-sm font-semibold text-foreground tabular-nums">
+                      {formatCurrency(loan.interest_accrued || 0)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -273,9 +281,9 @@ export default function LenderDashboard() {
           </div>
         )}
 
-        <p className="text-sm text-gray-500 mt-4">
-          Showing {filteredLoans.length} of {loans.length} loans
-        </p>
+        <div className="px-6 py-[13px] font-mono text-[11px] text-muted-foreground">
+          Showing {filteredLoans.length} of {loans.length} facilities
+        </div>
       </div>
     </div>
   )

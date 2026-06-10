@@ -1,63 +1,62 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
+const VALID_THEMES = ['oxblood', 'modern-blue', 'dark-pro', 'minimal-green', 'luxury-gold', 'tech-purple']
+
+// Save the current user's theme preference
 export async function PUT(request: Request) {
   try {
     const supabase = await createClient()
-    
-    // Get current user
+
     const { data: { user } } = await supabase.auth.getUser()
-    
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // Get the theme from request body
     const body = await request.json()
-    const { theme } = body
+    const theme = body?.theme
 
-    // Validate theme
-    const validThemes = ['modern-blue', 'dark-pro', 'minimal-green', 'luxury-gold', 'tech-purple']
-    if (!validThemes.includes(theme)) {
-      return NextResponse.json(
-        { error: 'Invalid theme' },
-        { status: 400 }
-      )
+    if (!theme || !VALID_THEMES.includes(theme)) {
+      return NextResponse.json({ error: 'Invalid theme' }, { status: 400 })
     }
 
-    // Upsert user preference (insert or update)
+    const { error } = await supabase
+      .from('users')
+      .update({ theme_preference: theme })
+      .eq('id', user.id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ ok: true, theme })
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  }
+}
+
+// Load the current user's saved theme preference
+export async function GET() {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
     const { data, error } = await supabase
-      .from('user_preferences')
-      .upsert(
-        {
-          user_id: user.id,
-          theme: theme,
-          updated_at: new Date().toISOString()
-        },
-        {
-          onConflict: 'user_id'
-        }
-      )
-      .select()
+      .from('users')
+      .select('theme_preference')
+      .eq('id', user.id)
       .single()
 
     if (error) {
-      console.error('Database error:', error)
-      return NextResponse.json(
-        { error: 'Failed to save theme' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ theme: data?.theme_preference || 'oxblood' })
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
