@@ -25,12 +25,16 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(null)
 
-    if (!role) {
-      setError('Please choose how you’ll use LoanLens.')
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Please enter your first and last name.')
       return
     }
-    if (entityType === 'company' && !companyName.trim()) {
-      setError('Please enter your company name.')
+    if (!email.trim()) {
+      setError('Please enter your email address.')
+      return
+    }
+    if (!role) {
+      setError('Please choose how you’ll use LoanLens.')
       return
     }
 
@@ -83,12 +87,17 @@ export default function RegisterPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
           <p className="text-sm text-muted-foreground mt-1">Set up your entity on LoanLens.</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            <span className="text-destructive">*</span> Required fields
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Role */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">How will you use LoanLens?</label>
+            <label className="text-sm font-medium text-foreground">
+              How will you use LoanLens? <span className="text-destructive">*</span>
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {(['broker', 'lender'] as Role[]).map((r) => (
                 <button
@@ -111,7 +120,9 @@ export default function RegisterPage() {
 
           {/* Entity type */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Are you a company or an individual?</label>
+            <label className="text-sm font-medium text-foreground">
+              Are you a company or an individual? <span className="text-destructive">*</span>
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {(['company', 'individual'] as EntityType[]).map((t) => (
                 <button
@@ -128,38 +139,49 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Names — always */}
+          {/* Names — always required */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label htmlFor="firstName" className="text-sm font-medium text-foreground">First name</label>
+              <label htmlFor="firstName" className="text-sm font-medium text-foreground">
+                First name <span className="text-destructive">*</span>
+              </label>
               <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground" />
             </div>
             <div className="space-y-1">
-              <label htmlFor="lastName" className="text-sm font-medium text-foreground">Last name</label>
+              <label htmlFor="lastName" className="text-sm font-medium text-foreground">
+                Last name <span className="text-destructive">*</span>
+              </label>
               <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground" />
             </div>
           </div>
 
-          {/* Company name — only if company */}
+          {/* Company name — only if company, optional */}
           {entityType === 'company' && (
             <div className="space-y-1">
-              <label htmlFor="companyName" className="text-sm font-medium text-foreground">Company name</label>
+              <label htmlFor="companyName" className="text-sm font-medium text-foreground">
+                Company name <span className="text-muted-foreground text-xs">(optional)</span>
+              </label>
               <input id="companyName" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground" />
             </div>
           )}
 
+          {/* Email — required */}
           <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
+            <label htmlFor="email" className="text-sm font-medium text-foreground">
+              Email <span className="text-destructive">*</span>
+            </label>
             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground" />
           </div>
 
-          {/* Password with eye toggle */}
+          {/* Password with eye toggle — required */}
           <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
+            <label htmlFor="password" className="text-sm font-medium text-foreground">
+              Password <span className="text-destructive">*</span>
+            </label>
             <div className="relative">
               <input
                 id="password"
