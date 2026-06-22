@@ -15,8 +15,8 @@ export default async function NewBrokerPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Add Broker</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-foreground">Add Broker</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Add a new broker contact with their commission structure.
         </p>
       </div>

@@ -9,8 +9,8 @@ export default async function NewSolicitorPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Add Solicitor</h1>
-        <p className="mt-2 text-sm text-gray-600">Add a new solicitor firm.</p>
+        <h1 className="text-2xl font-bold text-foreground">Add Solicitor</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Add a new solicitor firm.</p>
       </div>
       <SolicitorForm companyId={userData?.company_id} />
     </div>

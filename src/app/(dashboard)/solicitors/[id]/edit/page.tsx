@@ -15,8 +15,8 @@ export default async function EditSolicitorPage({ params }: { params: Promise<{ 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Solicitor</h1>
-        <p className="mt-2 text-sm text-gray-600">Update solicitor details.</p>
+        <h1 className="text-2xl font-bold text-foreground">Edit Solicitor</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Update solicitor details.</p>
       </div>
       <SolicitorForm solicitor={solicitor} companyId={userData?.company_id} />
     </div>

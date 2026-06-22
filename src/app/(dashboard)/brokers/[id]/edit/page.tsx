@@ -29,8 +29,8 @@ export default async function EditBrokerPage({ params }: { params: Promise<{ id:
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Broker</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-foreground">Edit Broker</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Update broker contact details and commission structure.
         </p>
       </div>

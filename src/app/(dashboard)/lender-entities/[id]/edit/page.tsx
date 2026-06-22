@@ -15,8 +15,8 @@ export default async function EditEntityPage({ params }: { params: Promise<{ id:
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Lender Entity</h1>
-        <p className="mt-2 text-sm text-gray-600">Update entity details.</p>
+        <h1 className="text-2xl font-bold text-foreground">Edit Lender Entity</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Update entity details.</p>
       </div>
       <LenderEntityForm entity={entity} companyId={userData?.company_id} />
     </div>
