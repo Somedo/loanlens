@@ -51,8 +51,14 @@ export async function GET() {
       })
       .reduce((sum, l) => sum + Number(l.total_redemption_amount || 0), 0)
 
+    // Attach live accrued interest to each loan row
+    const loansWithAccrued = safeLoans.map((l) => ({
+      ...l,
+      interest_accrued: calcAccruedInterest(l),
+    }))
+
     return NextResponse.json({
-      loans: safeLoans,
+      loans: loansWithAccrued,
       totals: { deployed, pipeline, expectedReturns30d, accruredInterest, defaults },
     })
   } catch (err) {
