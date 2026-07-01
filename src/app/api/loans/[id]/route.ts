@@ -5,7 +5,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const supabase = await createClient()
-    const { data: loan, error } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers(name, company_name), solicitor:solicitors(firm_name), fees:loan_fees(*)').eq('id', id).single()
+    const { data: loan, error } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers!loans_broker_id_fkey(name, company_name), solicitor:solicitors(firm_name), fees:loan_fees(*)').eq('id', id).single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ loan })
   } catch (error) {

@@ -14,6 +14,8 @@ interface Broker {
   default_commission_amount: number | null
   notes: string
   is_active: boolean
+  is_broker?: boolean
+  is_introducer?: boolean
 }
 
 export default function BrokerForm({ broker, companyId }: { broker?: Broker; companyId: string }) {
@@ -31,12 +33,22 @@ export default function BrokerForm({ broker, companyId }: { broker?: Broker; com
     default_commission_amount: broker?.default_commission_amount || null,
     notes: broker?.notes || '',
     is_active: broker?.is_active ?? true,
+    is_broker: broker?.is_broker ?? true,
+    is_introducer: broker?.is_introducer ?? false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setMessage('')
+
+    // Guard: a contact must be at least one type
+    if (!formData.is_broker && !formData.is_introducer) {
+      setMessage('Please select at least one type: Broker or Introducer')
+      setSaving(false)
+      return
+    }
+
     try {
       const url = broker?.id ? `/api/brokers/${broker.id}` : '/api/brokers'
       const method = broker?.id ? 'PUT' : 'POST'
@@ -46,10 +58,10 @@ export default function BrokerForm({ broker, companyId }: { broker?: Broker; com
         body: JSON.stringify({ ...formData, companyId }),
       })
       if (response.ok) {
-        setMessage('Broker saved successfully!')
+        setMessage('Contact saved successfully!')
         setTimeout(() => router.push('/brokers'), 1000)
       } else {
-        setMessage('Failed to save broker')
+        setMessage('Failed to save contact')
       }
     } catch (error) {
       setMessage('An error occurred')
@@ -64,6 +76,33 @@ export default function BrokerForm({ broker, companyId }: { broker?: Broker; com
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="lens-card p-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+          {/* Contact type */}
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-foreground mb-3">Contact Type *</label>
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.is_broker}
+                  onChange={(e) => setFormData({ ...formData, is_broker: e.target.checked })}
+                  className="h-4 w-4 rounded"
+                />
+                <span className="ml-2 text-sm text-foreground">Broker <span className="text-muted-foreground">(packages the deal)</span></span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.is_introducer}
+                  onChange={(e) => setFormData({ ...formData, is_introducer: e.target.checked })}
+                  className="h-4 w-4 rounded"
+                />
+                <span className="ml-2 text-sm text-foreground">Introducer <span className="text-muted-foreground">(refers only)</span></span>
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">A contact can be both.</p>
+          </div>
+
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-foreground">Contact Name *</label>
             <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} required />
@@ -127,7 +166,7 @@ export default function BrokerForm({ broker, companyId }: { broker?: Broker; com
           <div className="sm:col-span-2">
             <label className="flex items-center cursor-pointer">
               <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="h-4 w-4 rounded" />
-              <span className="ml-2 text-sm text-foreground">Active broker</span>
+              <span className="ml-2 text-sm text-foreground">Active contact</span>
             </label>
           </div>
         </div>
@@ -137,7 +176,7 @@ export default function BrokerForm({ broker, companyId }: { broker?: Broker; com
         {message && <span className="text-sm text-muted-foreground">{message}</span>}
         <button type="button" onClick={() => router.push('/brokers')} className="text-sm font-semibold text-foreground">Cancel</button>
         <button type="submit" disabled={saving} className="rounded-md px-6 py-2 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50" style={{ background: 'var(--primary)' }}>
-          {saving ? 'Saving...' : broker?.id ? 'Update Broker' : 'Add Broker'}
+          {saving ? 'Saving...' : broker?.id ? 'Update Contact' : 'Add Contact'}
         </button>
       </div>
     </form>

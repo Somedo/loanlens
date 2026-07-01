@@ -11,7 +11,7 @@ export default async function LoanDetailPage({ params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser()
   const { data: userData } = await supabase.from('users').select('company_id').eq('id', user?.id).single()
 
-  const { data: loan } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers(name, company_name), solicitor:solicitors(firm_name), fees:loan_fees(*)').eq('id', id).eq('company_id', userData?.company_id).single()
+  const { data: loan } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers!loans_broker_id_fkey(name, company_name), solicitor:solicitors(firm_name), fees:loan_fees(*)').eq('id', id).eq('company_id', userData?.company_id).single()
   if (!loan) notFound()
 
   const dt = "text-sm font-medium text-muted-foreground"

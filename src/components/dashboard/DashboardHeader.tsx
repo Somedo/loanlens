@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MENU_ITEMS } from '@/components/dashboard/menuItems'
+import { visibleMenuItems } from '@/components/dashboard/menuItems'
 
 export default function DashboardHeader({ user }: { user: any }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+
+  const canLend = user?.company?.can_lend ?? false
+  const canBroker = user?.company?.can_broker ?? false
+  const items = visibleMenuItems(canLend, canBroker)
 
   const closeMenu = () => setMobileMenuOpen(false)
 
@@ -71,7 +75,20 @@ export default function DashboardHeader({ user }: { user: any }) {
 
         {/* Menu Items */}
         <div className="px-4 py-4 space-y-1">
-          {MENU_ITEMS.map((item) => {
+          {items.map((item) => {
+            if (item.comingSoon) {
+              return (
+                <div
+                  key={item.href}
+                  className="flex items-center justify-between px-4 py-3 rounded-lg font-medium text-muted-foreground/50 cursor-default"
+                >
+                  {item.label}
+                  <span className="text-[10px] font-medium uppercase tracking-wide rounded px-1.5 py-0.5" style={{ background: 'var(--accent)', color: 'var(--primary)' }}>
+                    Soon
+                  </span>
+                </div>
+              )
+            }
             const isActive = pathname === item.href
             return (
               <Link

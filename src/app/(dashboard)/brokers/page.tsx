@@ -22,9 +22,9 @@ export default async function BrokersPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Brokers</h1>
+          <h1 className="text-2xl font-bold text-foreground">Brokers / Introducers</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage your broker contacts and commission rates.
+            Manage your broker and introducer contacts and commission rates.
           </p>
         </div>
         <Link
@@ -32,7 +32,7 @@ export default async function BrokersPage() {
           className="rounded-md px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm"
           style={{ background: 'var(--primary)' }}
         >
-          Add Broker
+          Add Contact
         </Link>
       </div>
 
@@ -51,15 +51,15 @@ export default async function BrokersPage() {
               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-semibold text-foreground">No brokers</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Get started by adding your first broker.</p>
+          <h3 className="mt-2 text-sm font-semibold text-foreground">No contacts</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Get started by adding your first broker or introducer.</p>
           <div className="mt-6">
             <Link
               href="/brokers/new"
               className="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm"
               style={{ background: 'var(--primary)' }}
             >
-              Add Broker
+              Add Contact
             </Link>
           </div>
         </div>
@@ -70,6 +70,7 @@ export default async function BrokersPage() {
               <thead>
                 <tr>
                   <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-foreground">Name</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-foreground">Type</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-foreground">Company</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-foreground">Email</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-foreground">Phone</th>
@@ -85,6 +86,20 @@ export default async function BrokersPage() {
                   <tr key={broker.id}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-foreground">
                       {broker.name}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                      <div className="flex gap-1.5">
+                        {broker.is_broker && (
+                          <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'var(--accent)', color: 'var(--primary)' }}>
+                            Broker
+                          </span>
+                        )}
+                        {broker.is_introducer && (
+                          <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>
+                            Introducer
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-muted-foreground">
                       {broker.company_name || '-'}

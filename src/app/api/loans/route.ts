@@ -6,7 +6,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const { data: userData } = await supabase.from('users').select('company_id').eq('id', user?.id).single()
-    const { data: loans, error } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers(name)').eq('company_id', userData?.company_id).order('created_at', { ascending: false })
+    const { data: loans, error } = await supabase.from('loans').select('*, lender_entity:lender_entities(name), broker:brokers!loans_broker_id_fkey(name)').eq('company_id', userData?.company_id).order('created_at', { ascending: false })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ loans })
   } catch (error) {

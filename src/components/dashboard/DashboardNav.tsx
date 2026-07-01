@@ -3,12 +3,16 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { MENU_ITEMS } from '@/components/dashboard/menuItems'
+import { visibleMenuItems } from '@/components/dashboard/menuItems'
 
 export default function DashboardNav({ user }: { user: any }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  const canLend = user?.company?.can_lend ?? false
+  const canBroker = user?.company?.can_broker ?? false
+  const items = visibleMenuItems(canLend, canBroker)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -30,7 +34,19 @@ export default function DashboardNav({ user }: { user: any }) {
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {MENU_ITEMS.map((item) => {
+                {items.map((item) => {
+                  if (item.comingSoon) {
+                    return (
+                      <li key={item.href}>
+                        <span className="group flex items-center justify-between gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground/50 cursor-default">
+                          {item.label}
+                          <span className="text-[10px] font-medium uppercase tracking-wide rounded px-1.5 py-0.5" style={{ background: 'var(--accent)', color: 'var(--primary)' }}>
+                            Soon
+                          </span>
+                        </span>
+                      </li>
+                    )
+                  }
                   const isActive = pathname === item.href
                   return (
                     <li key={item.href}>
